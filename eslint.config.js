@@ -78,6 +78,7 @@ export default tseslint.config(
           shallowOnly: true,
         },
       ],
+      'vue/multi-word-component-names': 'off', // 关闭多单词组件名限制
     },
   },
 
