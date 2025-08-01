@@ -18,8 +18,12 @@ const onClickCell = (item: CellData) => {
   chosenAddress.value = item.address
 }
 
-const fire = () => {
+const fire = async () => {
   // send
+  const data = await fetch('http://127.0.0.1:3000')
+  const result = await data.text()
+  console.log(result)
+
   const newData: BoardRow[] = Array.from({ length: 10 }, (v1, row) =>
     Array.from({ length: 10 }, (v2, col) => ({ status: 'unshoot', address: { x: col, y: row } })))
   newData[chosenAddress.value.y][chosenAddress.value.x].status = 'miss'

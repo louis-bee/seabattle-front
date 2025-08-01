@@ -1,5 +1,17 @@
 <script setup lang="ts">
 import ChessBoard from './components/chessBoard.vue'
+
+const socket = new WebSocket('ws://localhost:3000/basic')
+
+socket.onopen = () => {
+  socket.send('你好')
+}
+
+socket.onmessage = ({ data }) => {
+  console.log(data)
+}
+console.log(socket)
+
 </script>
 
 <template>
