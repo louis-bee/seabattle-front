@@ -1,0 +1,74 @@
+<script setup lang="ts">
+import { computed, defineProps } from 'vue'
+import type { Address, CellData } from '@/type/chess'
+
+const props = defineProps<{
+  cellData: CellData
+  chosenAddress: Address
+}>()
+
+const isChosen = computed(() => {
+  const { x: chosenX, y: chosenY } = props.chosenAddress
+  const { x, y } = props.cellData.address
+  return chosenX === x && chosenY === y
+})
+</script>
+
+<template>
+  <div
+    class="w-10% h-10% bg-bluegray b-solid b-1 b-black flex justify-center items-center"
+  >
+    <div
+      v-if="isChosen"
+      class="chosen"
+    />
+    <div
+      v-if="props.cellData.status==='unshoot'"
+      class="unshoot"
+    />
+    <div
+      v-if="props.cellData.status==='miss'"
+      class="miss"
+    />
+    <div
+      v-if="props.cellData.status==='goal'"
+      class="goal"
+    />
+    <div
+      v-if="props.cellData.status==='down'"
+      class="down"
+    />
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.unshoot {
+  background-color: inherit;
+}
+
+.miss {
+  width: 80%;
+  height: 80%;
+  border-radius: 100%;
+  background-color: rgba(0, 0, 0, 0.211);
+}
+
+.goal {
+  width: 80%;
+  height: 80%;
+  border-radius: 100%;
+  background-color: yellow;
+}
+
+.down {
+  background-color: rgba(1, 1, 1, 0.673);
+}
+
+.chosen {
+  width: 80%;
+  height: 80%;
+  border-radius: 100%;
+  border: solid 1px rgb(26, 26, 26);
+  background-color: inherit;
+}
+</style>
