@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onUnmounted } from 'vue'
 import ChessBoard from './components/chessBoard.vue'
 
 const socket = new WebSocket('ws://localhost:3000/basic')
@@ -11,6 +12,10 @@ socket.onmessage = ({ data }) => {
   console.log(data)
 }
 console.log(socket)
+
+onUnmounted(() => {
+  socket.close()
+})
 
 </script>
 
