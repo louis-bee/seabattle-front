@@ -65,10 +65,11 @@ const isChosen = computed(() => {
 }
 
 .chosen {
-  width: 80%;
-  height: 80%;
+  position: absolute;
+  width: 40px;
+  height: 40px;
   border-radius: 100%;
   border: solid 1px rgb(26, 26, 26);
-  background-color: inherit;
+  background-color: transparent;
 }
 </style>
