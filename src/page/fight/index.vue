@@ -1,27 +1,30 @@
 <script setup lang="ts">
-import { onUnmounted } from 'vue'
+import { useWebSocket } from '@/api/websocket'
 import ChessBoard from './components/chessBoard.vue'
+import { ref } from 'vue'
+import type { BoardData } from '@/type/chess'
 
-const socket = new WebSocket('ws://localhost:3000/basic')
+const ws = useWebSocket()
 
-socket.onopen = () => {
-  socket.send('你好')
-}
-
-socket.onmessage = ({ data }) => {
-  console.log(data)
-}
-console.log(socket)
-
-onUnmounted(() => {
-  socket.close()
+ws.onMatch((data) => {
+  boardData.value = data
 })
+
+const boardData = ref<BoardData>()
 
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-center h-100vh">
-    <ChessBoard />
+    <h2
+      v-if="!boardData"
+    >
+      正在匹配对手。。
+    </h2>
+    <ChessBoard
+      v-else
+      :data="boardData"
+    />
   </div>
 </template>
 

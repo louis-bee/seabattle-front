@@ -1,3 +1,5 @@
+import type { Address, BoardData } from '@/type/chess'
+
 export interface ReceiveMessage {
   type: 'match' | 'fireRes' | 'fire' | 'quit' | 'info'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -10,24 +12,106 @@ export interface SendMessage {
   data?: any
 }
 
+export interface FireRes {
+  newBoard: BoardData
+  message: string
+}
+
+type callType = 'fire' | 'wait'
+
+interface PromiseEntry {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  resolve: (value?: any) => void
+  reject: (reason?: string) => void
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Callback = ((data: any) => void)
+
+let socket: WebSocket | undefined = undefined
+let onMatchCallback: Callback | undefined = undefined
+
+const promiseMap = new Map<callType, PromiseEntry>()
+
 export function useWebSocket() {
-  const socket = new WebSocket('ws://localhost:3000/game')
+  if (!socket) {
+    socket = new WebSocket('ws://localhost:3000/game')
+  }
 
   socket.onopen = () => {
-    sendMessage(socket, { type: 'info', data: { message: '连接成功' } })
+    console.log('client: connect success')
   }
 
-  socket.onmessage = ({ data }) => {
-    console.log(JSON.parse(data.toString()))
+  socket.onmessage = handleMessage
+
+  function onMatch(callback: Callback) {
+    onMatchCallback = callback
   }
-  console.log(socket)
+
+  function fire(address: Address) {
+    if (promiseMap.has('fire')) return
+    return new Promise((resolve, reject) => {
+      promiseMap.set('fire', { resolve, reject })
+      send({ type: 'fire', data: { address } })
+    })
+  }
 
   function send(message: SendMessage) {
-    sendMessage(socket, message)
+    if (socket) {
+      sendMessage(socket, message)
+    }
+  }
+
+  function wait() {
+    return new Promise((resolve, reject) => {
+      promiseMap.set('wait', { resolve, reject })
+    })
+  }
+
+  function handleMessage({ data }: MessageEvent) {
+    const message: ReceiveMessage = JSON.parse(data.toString())
+    switch (message.type) {
+      case 'info': {
+        console.log(message.data.message)
+        break
+      }
+      case 'match': {
+        const boardData = message.data
+        console.log('匹配成功，初始化棋盘：', boardData)
+        // 触发onMatch
+        if (onMatchCallback) {
+          onMatchCallback(boardData)
+        }
+        break
+      }
+      case 'fire': {
+        promiseMap.get('wait')?.resolve(message.data)
+        promiseMap.delete('wait')
+        break
+      }
+      case 'fireRes': {
+        promiseMap.get('fire')?.resolve(message.data)
+        promiseMap.delete('fire')
+        break
+      }
+      case 'quit': {
+        console.log('服务器要求关闭连接')
+        socket?.close()
+        break
+      }
+    }
+  }
+
+  function quit() {
+    socket?.close()
   }
 
   return {
     send,
+    fire,
+    onMatch,
+    quit,
+    wait,
   }
 }
 

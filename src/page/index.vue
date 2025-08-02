@@ -13,7 +13,7 @@ const test = async () => {
   console.log(result)
 }
 
-let ws: any = undefined
+let ws: ReturnType<typeof useWebSocket> | undefined = undefined
 const testGameSocket = () => {
   ws = useWebSocket()
 }
