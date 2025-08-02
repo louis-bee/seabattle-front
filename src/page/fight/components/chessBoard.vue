@@ -6,6 +6,7 @@ import type { Address, CellData, BoardData } from '@/type/chess'
 const props = defineProps<{
   data: BoardData
   address: Address
+  isMyBoard?: boolean
 }>()
 
 const boardListData = computed(() => {
@@ -26,6 +27,7 @@ const onClickCell = (item: CellData) => {
       :key="index"
       :cell-data="item"
       :chosen-address="props.address"
+      :is-my-board="props.isMyBoard"
       @click="onClickCell(item)"
     />
   </div>

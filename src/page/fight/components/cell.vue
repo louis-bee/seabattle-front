@@ -5,6 +5,7 @@ import type { Address, CellData } from '@/type/chess'
 const props = defineProps<{
   cellData: CellData
   chosenAddress: Address
+  isMyBoard: boolean
 }>()
 
 const isChosen = computed(() => {
@@ -24,7 +25,8 @@ const isChosen = computed(() => {
     />
     <div
       v-if="props.cellData.status==='unshoot'"
-      class="unshoot"
+      :class="{'bg-white': props.isMyBoard && props.cellData.hasBoat}"
+      class="w-100% h-100%"
     />
     <div
       v-if="props.cellData.status==='miss'"
@@ -32,6 +34,7 @@ const isChosen = computed(() => {
     />
     <div
       v-if="props.cellData.status==='goal'"
+      :class="{'bg-white': props.cellData.hasBoat}"
       class="goal"
     />
     <div
@@ -42,10 +45,6 @@ const isChosen = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.unshoot {
-  background-color: inherit;
-}
-
 .miss {
   width: 80%;
   height: 80%;

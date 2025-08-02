@@ -26,14 +26,14 @@ const onEnemyFireResp = (res: FireRes) => {
   console.log('对方射击的结果:', res)
   const { newBoard, message } = res as FireRes
   console.log(message)
-  enemyBoardData.value = newBoard
+  myBoardData.value = newBoard
 }
 
 const onMyFireResp = (res: FireRes) => {
-  console.log('对方射击的结果:', res)
+  console.log('我方射击的结果:', res)
   const { newBoard, message } = res as FireRes
   console.log(message)
-  myBoardData.value = newBoard
+  enemyBoardData.value = newBoard
 }
 
 const shotting = ref(false)
@@ -60,10 +60,12 @@ const fire = async () => {
   waiting.value = false
 }
 
+const myAddress = ref<Address>({ x: -1, y: -1 })
+
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center h-100vh">
+  <div class="flex items-center justify-center h-100vh">
     <h2
       v-if="matching"
     >
@@ -76,15 +78,18 @@ const fire = async () => {
       <ChessBoard
         v-if="myBoardData"
         :data="myBoardData"
-        :address="chosenAddress"
+        :address="myAddress"
+        :is-my-board="true"
       />
-      <button
-        :disabled="fireDisabled"
-        @click="fire"
-      >
-        确定
-      </button>
-      <div class="w-40" />
+      <div class="w-150px flex items-center justify-center">
+        <button
+          class="w-70px h-40px"
+          :disabled="fireDisabled"
+          @click="fire"
+        >
+          开炮
+        </button>
+      </div>
       <ChessBoard
         v-if="enemyBoardData"
         :data="enemyBoardData"
