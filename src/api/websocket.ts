@@ -45,7 +45,7 @@ const promiseMap = new Map<callType, PromiseEntry>()
 
 export function useWebSocket(params: UseWSParams) {
   if (!socket) {
-    socket = new WebSocket(`ws://${import.meta.env.VITE_API_ADDRESS}/game?userName=${params.userName}`)
+    socket = new WebSocket(`ws://${import.meta.env.VITE_WS_ADDRESS}/game?userName=${params.userName}`)
   }
 
   if (params.quitCallback) callbackMap.set('quit', params.quitCallback)

@@ -33,10 +33,34 @@ const nameInp = ref('')
       开始
     </button>
   </div>
+  <div class="icp">
+    <a
+      href="https://beian.miit.gov.cn/"
+      target="_blank"
+    >粤ICP备2025414122号-1</a>
+  </div>
 </template>
 
 <style lang="scss" scoped>
 .placeholderStyle {
   padding: auto 6px;
 }
+
+.icp {
+    position: fixed;
+    bottom: 5vh;
+    left: 50%;
+    transform: translateX(-50%);
+    a {
+      color: #333;
+      text-decoration: none;
+      font-size: 12px;
+      &:hover {
+        opacity: 0.5;
+      }
+      &:active {
+        opacity: 0.2;
+      }
+    }
+  }
 </style>

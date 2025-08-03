@@ -122,7 +122,7 @@ onBeforeRouteLeave(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center h-100vh">
+  <div class="flex items-center justify-around h-100vh overflow-auto">
     <h2
       v-if="matching"
     >
