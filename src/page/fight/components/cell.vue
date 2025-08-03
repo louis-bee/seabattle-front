@@ -17,7 +17,7 @@ const isChosen = computed(() => {
 
 <template>
   <div
-    class="w-10% h-10% bg-bluegray b-solid b-1 b-black flex justify-center items-center"
+    class="w-10% h-10% bg-bluegray b-solid b-1 b-black flex justify-center items-center relative"
   >
     <div
       v-if="isChosen"
