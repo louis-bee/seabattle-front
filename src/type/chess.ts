@@ -1,8 +1,15 @@
 export interface BoardData {
-  aliveNum: number
   board: Board
+  aliveNum: AliveNum
 }
 
+export interface AliveNum {
+  total: number
+  four: number
+  three: number
+  two: number
+  one: number
+}
 export type Board = BoardRow[]
 
 export type BoardRow = CellData[]
