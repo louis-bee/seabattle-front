@@ -14,6 +14,7 @@ const boardListData = computed(() => {
 })
 
 const onClickCell = (item: CellData) => {
+  if (props.isMyBoard) return
   props.address.x = item.address.x
   props.address.y = item.address.y
 }

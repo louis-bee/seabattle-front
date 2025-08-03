@@ -31,21 +31,31 @@ const isChosen = computed(() => {
     <div
       v-if="props.cellData.status==='miss'"
       class="miss"
-    />
+    >
+      miss
+    </div>
     <div
       v-if="props.cellData.status==='goal'"
       :class="{'bg-white': props.cellData.hasBoat}"
-      class="goal"
-    />
+      class="w-100% h-100% flex items-center justify-center"
+    >
+      <div class="goal">
+        命中
+      </div>
+    </div>
     <div
       v-if="props.cellData.status==='down'"
       class="down"
-    />
+    >
+      击沉
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .miss {
+  text-align: center;
+  line-height: 38px;
   width: 80%;
   height: 80%;
   border-radius: 100%;
@@ -53,6 +63,8 @@ const isChosen = computed(() => {
 }
 
 .goal {
+  text-align: center;
+  line-height: 38px;
   width: 80%;
   height: 80%;
   border-radius: 100%;
@@ -60,6 +72,11 @@ const isChosen = computed(() => {
 }
 
 .down {
+  line-height: 50px;
+  text-align: center;
+  color: white;
+  height: 100%;
+  width: 100%;
   background-color: rgba(1, 1, 1, 0.673);
 }
 
