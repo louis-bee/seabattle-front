@@ -26,17 +26,20 @@ interface PromiseEntry {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Callback = ((data: any) => void)
+export type Callback = ((data?: any) => void)
 
 let socket: WebSocket | undefined = undefined
 let onMatchCallback: Callback | undefined = undefined
+let onQuitCallback: Callback | undefined = undefined
 
 const promiseMap = new Map<callType, PromiseEntry>()
 
-export function useWebSocket() {
+export function useWebSocket(quitCallback?: Callback) {
   if (!socket) {
     socket = new WebSocket('ws://localhost:3000/game')
   }
+
+  if (quitCallback) onQuitCallback = quitCallback
 
   socket.onopen = () => {
     console.log('client: connect success')
@@ -96,7 +99,8 @@ export function useWebSocket() {
       }
       case 'quit': {
         console.log('服务器要求关闭连接')
-        socket?.close()
+        quit()
+        if (onQuitCallback) onQuitCallback()
         break
       }
     }
@@ -104,6 +108,7 @@ export function useWebSocket() {
 
   function quit() {
     socket?.close()
+    socket = undefined
   }
 
   return {

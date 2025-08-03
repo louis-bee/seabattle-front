@@ -15,7 +15,11 @@ const myBoardData = ref<BoardData>()
 
 const enemyBoardData = ref<BoardData>()
 
-const ws = useWebSocket()
+const ws = useWebSocket(() => {
+  alert('对方退出了游戏')
+  $router.push('/')
+})
+
 ws.onMatch((data: MatchBoardData) => {
   myBoardData.value = data.myBoard
   enemyBoardData.value = data.enemyBoard
