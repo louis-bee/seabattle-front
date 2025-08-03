@@ -15,7 +15,7 @@ const test = async () => {
 
 let ws: ReturnType<typeof useWebSocket> | undefined = undefined
 const testGameSocket = () => {
-  ws = useWebSocket()
+  ws = useWebSocket({})
 }
 
 const testSend = () => {

@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { ref } from 'vue'
 const $router = useRouter()
 
 const begin = () => {
-  $router.push('/fight')
+  $router.push({
+    path: '/fight',
+    query: {
+      userName: nameInp.value,
+    },
+  })
 }
+
+const nameInp = ref('')
 </script>
 
 <template>
@@ -12,6 +20,12 @@ const begin = () => {
     <h1 class="font-600 text-36px">
       海 战 棋
     </h1>
+    <input
+      v-model="nameInp"
+      class="mt-12px px-5px text-14px text-center h-32px w-220px b b-solid b-b-blueGray"
+      placeholder="输入昵称"
+      placeholder-class="placeholderStyle"
+    >
     <button
       class="cursor-pointer mt-20px h-36px w-100px"
       @click="begin"
@@ -22,4 +36,7 @@ const begin = () => {
 </template>
 
 <style lang="scss" scoped>
+.placeholderStyle {
+  padding: auto 6px;
+}
 </style>

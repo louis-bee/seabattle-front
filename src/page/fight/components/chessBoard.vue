@@ -7,6 +7,7 @@ const props = defineProps<{
   data: BoardData
   address: Address
   isMyBoard?: boolean
+  userName: string
 }>()
 
 const boardListData = computed(() => {
@@ -19,26 +20,42 @@ const onClickCell = (item: CellData) => {
   props.address.y = item.address.y
 }
 
+const aliveNum = computed(() => {
+  return props.data.aliveNum
+})
+
 </script>
 
 <template>
-  <div class="flex gap-10px">
+  <div class="flex gap-18px">
     <div
-      :class="{'order-2': !props.isMyBoard}"
-      class="w-100px"
+      :class="{'order-2': !props.isMyBoard,'text-right': props.isMyBoard}"
+      class="w-120px"
     >
-      <h3 class="font-600 text-22px mt-10px">
+      <div class="c-bluegray mt-10px font-600 text-28px ">
+        {{ props.userName }}
+      </div>
+      <h3 class="font-600 text-22px mt-16px">
         存活军舰
       </h3>
       <li class="font-600 text-16px mt-10px">
-        总数: {{ props.data.aliveNum.total }}
+        总数: {{ aliveNum.total }}
       </li>
-      <li class="mt-5px">
-        战列舰: {{ props.data.aliveNum.four }}
+      <li
+        class="mt-5px"
+        :class="{'line-through decoration-2 text-red-7': !aliveNum.four}"
+      >
+        战列舰: {{ aliveNum.four }}
       </li>
-      <li>巡洋舰: {{ props.data.aliveNum.three }}</li>
-      <li>驱逐舰: {{ props.data.aliveNum.two }}</li>
-      <li>护卫舰: {{ props.data.aliveNum.one }}</li>
+      <li :class="{'line-through decoration-2 text-red-7': !aliveNum.three}">
+        巡洋舰: {{ aliveNum.three }}
+      </li>
+      <li :class="{'line-through decoration-2 text-red-7': !aliveNum.two}">
+        驱逐舰: {{ aliveNum.two }}
+      </li>
+      <li :class="{'line-through decoration-2 text-red-7': !aliveNum.one}">
+        护卫舰: {{ aliveNum.one }}
+      </li>
     </div>
     <div>
       <div class="flex flex-wrap w-500px h-500px bg-bluegray">

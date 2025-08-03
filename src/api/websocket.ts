@@ -1,7 +1,13 @@
 import type { Address, BoardData } from '@/type/chess'
 
+export interface UseWSParams {
+  userName?: string
+  endGameCallback?: Callback
+  quitCallback?: Callback
+}
+
 export interface ReceiveMessage {
-  type: 'match' | 'fireRes' | 'fire' | 'quit' | 'info'
+  type: 'match' | 'fireRes' | 'fire' | 'quit' | 'info' | 'endGame'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any
 }
@@ -10,6 +16,10 @@ export interface SendMessage {
   type: 'fire' | 'quit' | 'info'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any
+}
+
+export interface EndGameData {
+  message: 'fair' | 'win' | 'lose'
 }
 
 export interface FireRes {
@@ -29,17 +39,17 @@ interface PromiseEntry {
 export type Callback = ((data?: any) => void)
 
 let socket: WebSocket | undefined = undefined
-let onMatchCallback: Callback | undefined = undefined
-let onQuitCallback: Callback | undefined = undefined
 
+const callbackMap = new Map<ReceiveMessage['type'], Callback>()
 const promiseMap = new Map<callType, PromiseEntry>()
 
-export function useWebSocket(quitCallback?: Callback) {
+export function useWebSocket(params: UseWSParams) {
   if (!socket) {
-    socket = new WebSocket('ws://localhost:3000/game')
+    socket = new WebSocket(`ws://localhost:3000/game?userName=${params.userName}`)
   }
 
-  if (quitCallback) onQuitCallback = quitCallback
+  if (params.quitCallback) callbackMap.set('quit', params.quitCallback)
+  if (params.endGameCallback) callbackMap.set('endGame', params.endGameCallback)
 
   socket.onopen = () => {
     console.log('client: connect success')
@@ -48,7 +58,7 @@ export function useWebSocket(quitCallback?: Callback) {
   socket.onmessage = handleMessage
 
   function onMatch(callback: Callback) {
-    onMatchCallback = callback
+    callbackMap.set('match', callback)
   }
 
   function fire(address: Address) {
@@ -82,8 +92,10 @@ export function useWebSocket(quitCallback?: Callback) {
         const boardData = message.data
         console.log('匹配成功，初始化棋盘：', boardData)
         // 触发onMatch
-        if (onMatchCallback) {
+        if (callbackMap.has('match')) {
+          const onMatchCallback = callbackMap.get('match')!
           onMatchCallback(boardData)
+          callbackMap.delete('match')
         }
         break
       }
@@ -97,10 +109,22 @@ export function useWebSocket(quitCallback?: Callback) {
         promiseMap.delete('fire')
         break
       }
+      case 'endGame': {
+        if (callbackMap.has('endGame')) {
+          const onEndGameCallback = callbackMap.get('endGame')!
+          onEndGameCallback(message.data)
+          callbackMap.delete('endGame')
+        }
+        break
+      }
       case 'quit': {
         console.log('服务器要求关闭连接')
         quit()
-        if (onQuitCallback) onQuitCallback()
+        if (callbackMap.has('quit')) {
+          const onQuitCallback = callbackMap.get('quit')!
+          onQuitCallback()
+          callbackMap.delete('quit')
+        }
         break
       }
     }

@@ -1,26 +1,49 @@
 <script setup lang="ts">
-import { useWebSocket, type FireRes } from '@/api/websocket'
+import { useWebSocket, type EndGameData, type FireRes } from '@/api/websocket'
 import ChessBoard from './components/chessBoard.vue'
 import { ref, computed } from 'vue'
 import type { Address, BoardData } from '@/type/chess'
-import { onBeforeRouteLeave, useRouter } from 'vue-router'
+import { onBeforeRouteLeave, useRouter, useRoute } from 'vue-router'
 import EndDialog from './components/endDialog.vue'
 
 interface MatchBoardData {
+  enemyName: string
   myBoard: BoardData
   enemyBoard: BoardData
 }
+
+const $route = useRoute()
+const $router = useRouter()
+
+if (!$route.query.userName) {
+  $router.back()
+}
+
+const userName = ref({
+  myName: $route.query.userName as string,
+  enemyName: '',
+})
+
 const matching = ref(true)
 const myBoardData = ref<BoardData>()
 
 const enemyBoardData = ref<BoardData>()
 
-const ws = useWebSocket(() => {
-  alert('对方退出了游戏')
-  $router.push('/')
-})
+const ws = useWebSocket(
+  {
+    userName: userName.value.myName,
+    quitCallback: () => {
+      alert('对方退出了游戏')
+      $router.push('/')
+    },
+    endGameCallback: (data: EndGameData) => {
+      endGameData.value = data
+      showEndDialog.value = true
+    },
+  })
 
 ws.onMatch((data: MatchBoardData) => {
+  userName.value.enemyName = data.enemyName
   myBoardData.value = data.myBoard
   enemyBoardData.value = data.enemyBoard
   matching.value = false
@@ -74,25 +97,23 @@ const fire = async () => {
 
 const myAddress = ref<Address>({ x: -1, y: -1 })
 
-const $router = useRouter()
-
 const onQuit = () => {
   ws.quit()
   $router.push('/')
 }
 
-const showEndDialog = computed(() => {
-  return myBoardData.value?.aliveNum.total === 0 || enemyBoardData.value?.aliveNum.total === 0
-})
+const showEndDialog = ref(false)
 
-const dailogTitle = computed(() => {
-  const lose = myBoardData.value?.aliveNum.total === 0
-  const win = enemyBoardData.value?.aliveNum.total === 0
-  if (lose && win) return '平局'
-  if (lose) return '全军覆没'
-  if (win) return '胜利'
-  else return ''
-})
+// const dailogTitle = computed(() => {
+//   const lose = myBoardData.value?.aliveNum.total === 0
+//   const win = enemyBoardData.value?.aliveNum.total === 0
+//   if (lose && win) return '平局'
+//   if (lose) return '全军覆没'
+//   if (win) return '胜利'
+//   else return ''
+// })
+
+const endGameData = ref<EndGameData>()
 
 onBeforeRouteLeave(() => {
   ws.quit()
@@ -115,6 +136,7 @@ onBeforeRouteLeave(() => {
         v-if="myBoardData"
         :data="myBoardData"
         :address="myAddress"
+        :user-name="userName.myName"
         :is-my-board="true"
       />
       <div class="w-150px flex items-center justify-center">
@@ -130,13 +152,14 @@ onBeforeRouteLeave(() => {
         v-if="enemyBoardData"
         :data="enemyBoardData"
         :address="chosenAddress"
+        :user-name="userName.enemyName"
         @quit="onQuit"
       />
     </div>
   </div>
   <EndDialog
     v-if="showEndDialog"
-    :title="dailogTitle"
+    :data="endGameData!"
     @quit="onQuit"
   />
 </template>
