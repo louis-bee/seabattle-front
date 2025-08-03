@@ -1,4 +1,9 @@
-export type BoardData = BoardRow[]
+export interface BoardData {
+  aliveNum: number
+  board: Board
+}
+
+export type Board = BoardRow[]
 
 export type BoardRow = CellData[]
 

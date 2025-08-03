@@ -10,7 +10,7 @@ const props = defineProps<{
 }>()
 
 const boardListData = computed(() => {
-  return props.data.flat() || []
+  return props.data.board.flat() || []
 })
 
 const onClickCell = (item: CellData) => {

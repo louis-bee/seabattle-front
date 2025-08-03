@@ -2,7 +2,7 @@
 import { useWebSocket, type FireRes } from '@/api/websocket'
 import ChessBoard from './components/chessBoard.vue'
 import { ref, computed } from 'vue'
-import type { BoardData, Address } from '@/type/chess'
+import type { Address, BoardData } from '@/type/chess'
 
 interface MatchBoardData {
   myBoard: BoardData
@@ -39,10 +39,16 @@ const onMyFireResp = (res: FireRes) => {
 const shotting = ref(false)
 
 const fireDisabled = computed(() => {
-  return shotting.value || waiting.value
+  return shotting.value || waiting.value || repeatAddress.value
 })
 
 const chosenAddress = ref<Address>({ x: -1, y: -1 })
+
+const repeatAddress = computed(() => {
+  const { x, y } = chosenAddress.value
+  if (x < 0 || x >= 10 || y < 0 || y >= 10) return false
+  return enemyBoardData.value?.board[y][x].status !== 'unshoot'
+})
 
 const fire = async () => {
   if (chosenAddress.value.x < 0 || chosenAddress.value.y < 0 || chosenAddress.value.x >= 10 || chosenAddress.value.y >= 10) return
