@@ -3,6 +3,8 @@ import { useWebSocket, type FireRes } from '@/api/websocket'
 import ChessBoard from './components/chessBoard.vue'
 import { ref, computed } from 'vue'
 import type { Address, BoardData } from '@/type/chess'
+import { onBeforeRouteLeave, useRouter } from 'vue-router'
+import EndDialog from './components/endDialog.vue'
 
 interface MatchBoardData {
   myBoard: BoardData
@@ -68,6 +70,30 @@ const fire = async () => {
 
 const myAddress = ref<Address>({ x: -1, y: -1 })
 
+const $router = useRouter()
+
+const onQuit = () => {
+  ws.quit()
+  $router.push('/')
+}
+
+const showEndDialog = computed(() => {
+  return myBoardData.value?.aliveNum.total === 0 || enemyBoardData.value?.aliveNum.total === 0
+})
+
+const dailogTitle = computed(() => {
+  const lose = myBoardData.value?.aliveNum.total === 0
+  const win = enemyBoardData.value?.aliveNum.total === 0
+  if (lose && win) return '平局'
+  if (lose) return '全军覆没'
+  if (win) return '胜利'
+  else return ''
+})
+
+onBeforeRouteLeave(() => {
+  ws.quit()
+})
+
 </script>
 
 <template>
@@ -100,9 +126,15 @@ const myAddress = ref<Address>({ x: -1, y: -1 })
         v-if="enemyBoardData"
         :data="enemyBoardData"
         :address="chosenAddress"
+        @quit="onQuit"
       />
     </div>
   </div>
+  <EndDialog
+    v-if="showEndDialog"
+    :title="dailogTitle"
+    @quit="onQuit"
+  />
 </template>
 
 <style scoped>
