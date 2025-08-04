@@ -4,6 +4,7 @@ export interface UseWSParams {
   userName?: string
   endGameCallback?: Callback
   quitCallback?: Callback
+  closeCallback?: Callback
 }
 
 export interface ReceiveMessage {
@@ -11,6 +12,8 @@ export interface ReceiveMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any
 }
+
+type CallbackKey = 'endGame' | 'close' | 'quit' | 'match'
 
 export interface SendMessage {
   type: 'fire' | 'quit' | 'info'
@@ -40,7 +43,7 @@ export type Callback = ((data?: any) => void)
 
 let socket: WebSocket | undefined = undefined
 
-const callbackMap = new Map<ReceiveMessage['type'], Callback>()
+const callbackMap = new Map<CallbackKey, Callback>()
 const promiseMap = new Map<callType, PromiseEntry>()
 
 export function useWebSocket(params: UseWSParams) {
@@ -50,12 +53,23 @@ export function useWebSocket(params: UseWSParams) {
 
   if (params.quitCallback) callbackMap.set('quit', params.quitCallback)
   if (params.endGameCallback) callbackMap.set('endGame', params.endGameCallback)
+  if (params.closeCallback) callbackMap.set('close', params.closeCallback)
 
   socket.onopen = () => {
     console.log('client: connect success')
   }
 
   socket.onmessage = handleMessage
+
+  socket.onclose = () => {
+    // TODO：回调Map改造
+    if (callbackMap.has('close')) {
+      callbackMap.get('close')!()
+      callbackMap.delete('close')
+    }
+
+    socket = undefined
+  }
 
   function onMatch(callback: Callback) {
     callbackMap.set('match', callback)

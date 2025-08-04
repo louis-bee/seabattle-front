@@ -139,7 +139,7 @@ onBeforeRouteLeave(() => {
         :user-name="userName.myName"
         :is-my-board="true"
       />
-      <div class="w-150px flex items-center justify-center">
+      <div class="w-150px flex flex-col items-center justify-center">
         <button
           class="w-70px h-40px"
           :disabled="fireDisabled"
@@ -147,6 +147,10 @@ onBeforeRouteLeave(() => {
         >
           开炮
         </button>
+        <span
+          class="mt-10px"
+          :class="{'opacity-0': !waiting}"
+        >等待对方开炮 . . .</span>
       </div>
       <ChessBoard
         v-if="enemyBoardData"
