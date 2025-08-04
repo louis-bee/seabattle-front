@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineProps } from 'vue'
+import { computed } from 'vue'
 import type { Address, CellData } from '@/type/chess'
 
 const props = defineProps<{
@@ -49,6 +49,12 @@ const isChosen = computed(() => {
     >
       击沉
     </div>
+    <div
+      class="absolute"
+      :class="{'hover:bg-gray-6 w-81% h-81% rd-100%': !isMyBoard,
+               'hover:bg-gray-5 opacity-70 w-100% h-100%':isMyBoard
+      }"
+    />
   </div>
 </template>
 

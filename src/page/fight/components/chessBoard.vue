@@ -8,6 +8,7 @@ const props = defineProps<{
   address: Address
   isMyBoard?: boolean
   userName: string
+  isWaiting: boolean
 }>()
 
 const boardListData = computed(() => {
@@ -15,7 +16,7 @@ const boardListData = computed(() => {
 })
 
 const onClickCell = (item: CellData) => {
-  if (props.isMyBoard) return
+  if (props.isMyBoard || props.isWaiting) return
   props.address.x = item.address.x
   props.address.y = item.address.y
 }

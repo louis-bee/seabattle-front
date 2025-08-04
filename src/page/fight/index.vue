@@ -138,6 +138,7 @@ onBeforeRouteLeave(() => {
         :address="myAddress"
         :user-name="userName.myName"
         :is-my-board="true"
+        :is-waiting="waiting"
       />
       <div class="w-150px flex flex-col items-center justify-center">
         <button
@@ -157,6 +158,7 @@ onBeforeRouteLeave(() => {
         :data="enemyBoardData"
         :address="chosenAddress"
         :user-name="userName.enemyName"
+        :is-waiting="waiting"
         @quit="onQuit"
       />
     </div>
