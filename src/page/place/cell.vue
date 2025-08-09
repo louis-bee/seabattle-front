@@ -25,7 +25,7 @@ const onPlace = () => {
     class="w-10% h-10% b-solid b-1 b-black flex justify-center items-center relative"
     :class="{
       'bg-bluegray':props.cellData.status==='empty',
-      'bg-gray-4': props.cellData.status==='hovernear',
+      'bg-#a78e8e': props.cellData.status==='hovernear',
       'bg-gray-5': props.cellData.status==='hover',
       'bg-white': props.cellData.status==='occupy',
       'bg-red-9': props.cellData.status==='hoverintersect'

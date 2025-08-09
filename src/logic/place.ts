@@ -93,7 +93,8 @@ export function usePlaceHook() {
       console.log('重合')
       return
     }
-    place(board.value, z, y, x, length as HasBoat, position)
+
+    board.value = place(boardTemp, z, y, x, length as HasBoat, position)
     boatNum.value[numberToWord(length)] -= 1
     boatNum.value.total -= 1
     if (boatNum.value.total === 0) {
@@ -171,12 +172,14 @@ function updateBoardStatus(newBoard: PlaceBoard, z: boolean, y: number, x: numbe
 
 function place(board: PlaceBoard, z: boolean, y: number, x: number, length: HasBoat, position: number) {
   for (let i = 0; i < length; i++) {
-    if (z) {
-      board[y - position + i][x].status = 'occupy'
-      board[y - position + 1][x].hasBoat = length
-    } else {
-      board[y][x - position + i].status = 'occupy'
-      board[y][x - position + i].hasBoat = length
-    }
+    const currX = z ? x : x - position + i
+    const currY = z ? y - position + i : y
+    placeCell(currY, currX)
+  }
+  return board
+
+  function placeCell(y: number, x: number) {
+    board[y][x].status = 'occupy'
+    board[y][x].hasBoat = length
   }
 }
