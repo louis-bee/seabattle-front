@@ -1,56 +1,94 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
 import Cell from './cell.vue'
-import type { Board, CellData } from '@/type/chess'
-const SIZE = 10
-const board: Board = Array.from({ length: SIZE }, (v1, row) =>
-  Array.from({ length: SIZE }, (v2, col) => ({ status: 'unshoot', address: { x: col, y: row }, hasBoat: 0 })),
-)
+import { usePlaceHook } from '@/logic/place'
 
-const boardListData = computed(() => {
-  return board.flat() || []
-})
-
-const oneRef = ref(null)
-onMounted(() => {
-  console.log(oneRef.value)
-})
-
-const startDrag = (event) => {
-  console.log(event)
-  const target = event.target
-  event.dataTransfer.setData('id', target.id)
-  document.body.style.cursor = 'move'
-}
-
-const endDrag = () => {
-  // console.log(e)
-  document.body.style.cursor = 'default'
-}
-
-const onPlace = (cell: CellData) => {
-
-}
+const {
+  boatNum,
+  boardListData,
+  dragStart,
+  dragging,
+  dragEnd,
+  handleEnterCell,
+  handleLeaveCell,
+  handlePlaceCell,
+  handleClick,
+} = usePlaceHook()
 
 </script>
 
 <template>
   <div class="flex mt-50px">
-    <div class="w-500px">
+    <div class="w-250px flex flex-col gap-20px">
       <div
-        id="one"
-        draggable="true"
-        class="w-50px h-50px bg-amber"
-        @dragstart="startDrag"
-        @dragend="endDrag"
-      />
+        v-if="boatNum.one"
+        class="flex gap-5px"
+      >
+        <div
+          id="one"
+          draggable="true"
+          class="w-50px h-50px bg-amber"
+          @click="handleClick"
+          @dragstart="dragStart"
+          @drag="dragging"
+          @dragend="dragEnd"
+        />
+        <span>x{{ boatNum.one }}</span>
+      </div>
+      <div
+        v-if="boatNum.two"
+        class="flex gap-5px"
+      >
+        <div
+          id="two"
+          draggable="true"
+          class="w-100px h-50px bg-amber"
+          @click="handleClick"
+          @dragstart="dragStart"
+          @drag="dragging"
+          @dragend="dragEnd"
+        />
+        <span>x{{ boatNum.two }}</span>
+      </div>
+      <div
+        v-if="boatNum.three"
+        class="flex gap-5px"
+      >
+        <div
+          id="three"
+          draggable="true"
+          class="w-150px h-50px bg-amber"
+          @click="handleClick"
+          @dragstart="dragStart"
+          @drag="dragging"
+          @dragend="dragEnd"
+        />
+        <span>x{{ boatNum.three }}</span>
+      </div>
+      <div
+        v-if="boatNum.four"
+        class="flex gap-5px"
+      >
+        <div
+          id="four"
+          draggable="true"
+          class="w-200px h-50px bg-amber"
+          @click="handleClick"
+          @dragstart="dragStart"
+          @drag="dragging"
+          @dragend="dragEnd"
+        />
+        <span>x{{ boatNum.four }}</span>
+      </div>
+      <div class="h-200px h-150px h-100px opacity-0" />
     </div>
     <div class="flex flex-wrap w-500px h-500px bg-bluegray">
       <Cell
         v-for="item, index in boardListData"
         :key="index"
         :cell-data="item"
-        @place="onPlace"
+        @enter="handleEnterCell"
+        @leave="handleLeaveCell"
+        @place="handlePlaceCell"
       />
     </div>
   </div>

@@ -1,41 +1,39 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { CellData } from '@/type/chess'
+import type { PlaceCell } from '@/type/chess'
 
 const props = defineProps<{
-  cellData: CellData
+  cellData: PlaceCell
 }>()
-const emits = defineEmits(['place'])
+const emits = defineEmits(['enter', 'leave', 'place'])
 
-const dragHover = ref(false)
 const onEnter = () => {
-  dragHover.value = true
+  emits('enter', props.cellData)
+}
+const onHover = () => {
 }
 const onLeave = () => {
-  dragHover.value = false
+  emits('leave')
 }
-const onPlace = (event) => {
-  console.log(event)
+const onPlace = () => {
   emits('place', props.cellData)
-  const id = event.dataTransfer.getData('id')
-  const origin = document.querySelector(`#${id}`)
-  event.target.appendChild(origin)
-
-  // target.appendChild(document.getElementById(drag_id))
 }
 
 </script>
 
 <template>
   <div
-    class="w-10% h-10% bg-bluegray b-solid b-1 b-black flex justify-center items-center relative"
+    class="w-10% h-10% b-solid b-1 b-black flex justify-center items-center relative"
     :class="{
-      'bg-gray-5': dragHover
+      'bg-bluegray':props.cellData.status==='empty',
+      'bg-gray-4': props.cellData.status==='hovernear',
+      'bg-gray-5': props.cellData.status==='hover',
+      'bg-white': props.cellData.status==='occupy',
+      'bg-red-9': props.cellData.status==='hoverintersect'
     }"
     @dragenter.prevent="onEnter"
-    @dragover.prevent=""
+    @dragover.prevent="onHover"
     @dragleave.prevent="onLeave"
-    @drop="onPlace"
+    @drop.prevent="onPlace"
   />
 </template>
 
