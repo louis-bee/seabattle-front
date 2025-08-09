@@ -60,8 +60,8 @@ export function usePlaceHook() {
   let boardTemp: PlaceBoard // 用于离开格子时恢复棋盘
   let isIntersect = false
   function handleEnterCell(cell: PlaceCell) {
-    if (!isBoatDraging) return
     setTimeout(() => {
+      if (!isBoatDraging) return
       const { y, x } = cell.address
       boardTemp = _.cloneDeep(board.value)
       const newBoard = _.cloneDeep(boardTemp)

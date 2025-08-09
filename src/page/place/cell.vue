@@ -26,8 +26,8 @@ const onPlace = () => {
     :class="{
       'bg-bluegray':props.cellData.status==='empty',
       'bg-#a78e8e': props.cellData.status==='hovernear',
-      'bg-gray-5': props.cellData.status==='hover',
-      'bg-white': props.cellData.status==='occupy',
+      'bg-gray-7': props.cellData.status==='hover',
+      'bg-amber': props.cellData.status==='occupy',
       'bg-red-9': props.cellData.status==='hoverintersect'
     }"
     @dragenter.prevent="onEnter"
