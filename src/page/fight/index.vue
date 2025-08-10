@@ -32,6 +32,7 @@ const enemyBoardData = ref<BoardData>()
 const ws = useWebSocket(
   {
     userName: userName.value.myName,
+    userId: localStorage.getItem('userId')!,
     quitCallback: () => {
       alert('对方退出了游戏')
       $router.push('/')

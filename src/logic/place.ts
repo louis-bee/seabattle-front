@@ -9,7 +9,7 @@ interface BoatHTMLElement extends HTMLElement {
   z: boolean
 }
 
-export function usePlaceHook() {
+export default function usePlaceHook() {
   const board = ref<PlaceBoard>(Array.from({ length: SIZE }, (v1, row) =>
     Array.from({ length: SIZE }, (v2, col) => ({ status: 'empty', address: { x: col, y: row }, hasBoat: 0 })),
   ))

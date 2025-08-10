@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useWebSocket } from '@/api/websocket'
+import useWebSocket from '@/api/websocket'
 import { useRouter } from 'vue-router'
 const $router = useRouter()
 
@@ -15,7 +15,7 @@ const test = async () => {
 
 let ws: ReturnType<typeof useWebSocket> | undefined = undefined
 const testGameSocket = () => {
-  ws = useWebSocket({})
+  ws = useWebSocket()
 }
 
 const testSend = () => {

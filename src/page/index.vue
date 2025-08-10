@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import { ref } from 'vue'
-const $router = useRouter()
+import useWebSocket from '@/api/websocket'
+
+const { sendMessage } = useWebSocket()
+
+const nameInp = ref(localStorage.getItem('userName') || '')
 
 const begin = () => {
-  $router.push({
-    path: '/fight',
-    query: {
-      userName: nameInp.value,
-    },
-  })
+  if (nameInp.value === '') {
+    console.log('请输入昵称')
+  }
+  localStorage.setItem('userName', nameInp.value)
+  sendMessage({ type: 'match:init', data: {
+    userName: nameInp.value,
+  } })
 }
-
-const nameInp = ref('')
 </script>
 
 <template>

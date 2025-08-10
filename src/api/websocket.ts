@@ -1,24 +1,10 @@
-import type { Address, BoardData } from '@/type/chess'
+import type { BoardData } from '@/type/chess'
+import { getUserId, getUserName } from '@/utils/userInfo'
+import type { ReceiveMessage, SendMessage } from '@/type/message'
 
-export interface UseWSParams {
+interface UseWSParam {
+  userId: string
   userName?: string
-  endGameCallback?: Callback
-  quitCallback?: Callback
-  closeCallback?: Callback
-}
-
-export interface ReceiveMessage {
-  type: 'match' | 'fireRes' | 'fire' | 'quit' | 'info' | 'endGame'
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any
-}
-
-type CallbackKey = 'endGame' | 'close' | 'quit' | 'match'
-
-export interface SendMessage {
-  type: 'fire' | 'quit' | 'info'
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: any
 }
 
 export interface EndGameData {
@@ -30,135 +16,82 @@ export interface FireRes {
   message: string
 }
 
-type callType = 'fire' | 'wait'
+type WebSocketInstance = ReturnType<typeof createWebSocket>
 
-interface PromiseEntry {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resolve: (value?: any) => void
-  reject: (reason?: string) => void
-}
+let webSocketInstance: WebSocketInstance
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Callback = ((data?: any) => void)
-
-let socket: WebSocket | undefined = undefined
-
-const callbackMap = new Map<CallbackKey, Callback>()
-const promiseMap = new Map<callType, PromiseEntry>()
-
-export function useWebSocket(params: UseWSParams) {
-  if (!socket) {
-    socket = new WebSocket(`ws://${import.meta.env.VITE_WS_ADDRESS}/game?userName=${params.userName}`)
-  }
-
-  if (params.quitCallback) callbackMap.set('quit', params.quitCallback)
-  if (params.endGameCallback) callbackMap.set('endGame', params.endGameCallback)
-  if (params.closeCallback) callbackMap.set('close', params.closeCallback)
+function createWebSocket(params: UseWSParam) {
+  const socket = new WebSocket(`ws://${import.meta.env.VITE_WS_ADDRESS}/game?userName=${params.userName || ''}&userId=${params.userId}`)
 
   socket.onopen = () => {
     console.log('client: connect success')
   }
 
   socket.onmessage = handleMessage
-
-  socket.onclose = () => {
-    // TODO：回调Map改造
-    if (callbackMap.has('close')) {
-      callbackMap.get('close')!()
-      callbackMap.delete('close')
-    }
-
-    socket = undefined
-  }
-
-  function onMatch(callback: Callback) {
-    callbackMap.set('match', callback)
-  }
-
-  function fire(address: Address) {
-    if (promiseMap.has('fire')) return
-    return new Promise((resolve, reject) => {
-      promiseMap.set('fire', { resolve, reject })
-      send({ type: 'fire', data: { address } })
-    })
-  }
-
-  function send(message: SendMessage) {
-    if (socket) {
-      sendMessage(socket, message)
-    }
-  }
-
-  function wait() {
-    return new Promise((resolve, reject) => {
-      promiseMap.set('wait', { resolve, reject })
-    })
-  }
-
   function handleMessage({ data }: MessageEvent) {
     const message: ReceiveMessage = JSON.parse(data.toString())
-    switch (message.type) {
-      case 'info': {
+    const type = message.type
+
+    switch (true) {
+      case type.startsWith('connect'): {
+        const handleConnectMessage = new CustomEvent<ReceiveMessage>('connect', {
+          detail: message,
+        })
+        window.dispatchEvent(handleConnectMessage)
+        break
+      }
+
+      case type.startsWith('match'): {
+        const handleMatchMessage = new CustomEvent('match', {
+          detail: message,
+        })
+        window.dispatchEvent(handleMatchMessage)
+        break
+      }
+
+      case type.startsWith('place'): {
         console.log(message.data.message)
         break
       }
-      case 'match': {
-        const boardData = message.data
-        console.log('匹配成功，初始化棋盘：', boardData)
-        // 触发onMatch
-        if (callbackMap.has('match')) {
-          const onMatchCallback = callbackMap.get('match')!
-          onMatchCallback(boardData)
-          callbackMap.delete('match')
-        }
+
+      case type.startsWith('battle'): {
+        console.log(message.data.message)
         break
       }
-      case 'fire': {
-        promiseMap.get('wait')?.resolve(message.data)
-        promiseMap.delete('wait')
-        break
-      }
-      case 'fireRes': {
-        promiseMap.get('fire')?.resolve(message.data)
-        promiseMap.delete('fire')
-        break
-      }
-      case 'endGame': {
-        if (callbackMap.has('endGame')) {
-          const onEndGameCallback = callbackMap.get('endGame')!
-          onEndGameCallback(message.data)
-          callbackMap.delete('endGame')
-        }
-        break
-      }
-      case 'quit': {
-        console.log('服务器要求关闭连接')
-        quit()
-        if (callbackMap.has('quit')) {
-          const onQuitCallback = callbackMap.get('quit')!
-          onQuitCallback()
-          callbackMap.delete('quit')
-        }
+
+      case type.startsWith('info'): {
+        console.log(message.data.message)
         break
       }
     }
   }
 
-  function quit() {
-    socket?.close()
-    socket = undefined
+  socket.onclose = () => {
+    console.log('Websocket close')
+  }
+
+  function sendMessage(message: SendMessage) {
+    const rawData = JSON.stringify(message)
+    socket.send(rawData)
+  }
+
+  function getWsStatus() {
+    return socket.readyState
   }
 
   return {
-    send,
-    fire,
-    onMatch,
-    quit,
-    wait,
+    sendMessage,
+    getWsStatus,
   }
 }
 
-function sendMessage(ws: WebSocket, message: SendMessage) {
-  const rawData = JSON.stringify(message)
-  ws.send(rawData)
+export default function useWebSocket(): WebSocketInstance {
+  const userId = getUserId()
+  const userName = getUserName()
+  if (webSocketInstance) {
+    return webSocketInstance
+  } else {
+    webSocketInstance = createWebSocket({ userId, userName })
+    return webSocketInstance
+  }
 }

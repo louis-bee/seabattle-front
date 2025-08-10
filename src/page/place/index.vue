@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Cell from './cell.vue'
-import { usePlaceHook } from '@/logic/place'
+import usePlaceHook from '@/logic/place'
 
 const {
   boatNum,

@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/page/index.vue'
 
-// vue项目自带路由
 const routes = [
   {
     path: '/',
@@ -9,8 +8,20 @@ const routes = [
     component: Home,
   },
   {
+    path: '/match',
+    name: 'matchPage',
+    component: () =>
+      import(/* webpackChunkName: "match" */ '@/page/match/index.vue'),
+  },
+  {
+    path: '/place',
+    name: 'placePage',
+    component: () =>
+      import(/* webpackChunkName: "match" */ '@/page/place/index.vue'),
+  },
+  {
     path: '/fight',
-    name: 'Fight',
+    name: 'fightPage',
     component: () =>
       import(/* webpackChunkName: "fight" */ '@/page/fight/index.vue'),
   },
@@ -19,12 +30,6 @@ const routes = [
     name: 'Test',
     component: () =>
       import(/* webpackChunkName: "test" */ '@/page/test.vue'),
-  },
-  {
-    path: '/place',
-    name: 'Place',
-    component: () =>
-      import(/* webpackChunkName: "place" */ '@/page/place/index.vue'),
   },
 ]
 
