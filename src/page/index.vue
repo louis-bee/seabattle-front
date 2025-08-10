@@ -11,7 +11,7 @@ const begin = () => {
     console.log('请输入昵称')
   }
   localStorage.setItem('userName', nameInp.value)
-  sendMessage({ type: 'match:init', data: {
+  sendMessage({ type: 'match:match', data: {
     userName: nameInp.value,
   } })
 }

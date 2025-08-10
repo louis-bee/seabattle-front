@@ -16,9 +16,12 @@ export type BoardRow = CellData[]
 
 export interface CellData {
   address: Address
-  status: 'unshoot' | 'miss' | 'goal' | 'down'
+  status: CellStatus
   hasBoat: HasBoat
 }
+
+export type CellStatus = 'unshoot' | 'miss' | 'goal' | 'down'
+
 export type HasBoat = 0 | 1 | 2 | 3 | 4
 
 export interface Address {
@@ -28,10 +31,10 @@ export interface Address {
 
 export type PlaceBoard = PlaceCell[][]
 
-export type CellStatus = 'empty' | 'near' | 'occupy' | 'hover' | 'hovernear' | 'hoverintersect'
+export type PlaceCellStatus = 'empty' | 'near' | 'occupy' | 'hover' | 'hovernear' | 'hoverintersect'
 
 export interface PlaceCell {
   address: Address
-  status: CellStatus
+  status: PlaceCellStatus
   hasBoat: HasBoat
 }

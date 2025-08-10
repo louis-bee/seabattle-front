@@ -12,12 +12,15 @@ const {
   handleLeaveCell,
   handlePlaceCell,
   handleClick,
+  randomPlace,
+  submit,
+  submitted,
 } = usePlaceHook()
 
 </script>
 
 <template>
-  <div class="flex mt-50px">
+  <div class="flex items-center justify-around h-100vh w-800px overflow-auto m-auto">
     <div class="w-250px flex flex-col gap-20px">
       <div
         v-if="boatNum.four"
@@ -81,6 +84,18 @@ const {
         <span>x{{ boatNum.one }}</span>
       </div>
 
+      <button
+        :disabled="submitted"
+        @click="randomPlace"
+      >
+        随机摆放
+      </button>
+      <button
+        :disabled="boatNum.total>0 || submitted"
+        @click="submit"
+      >
+        完成
+      </button>
       <div class="h-200px h-150px h-100px opacity-0" />
     </div>
     <div class="flex flex-wrap w-500px h-500px bg-bluegray">

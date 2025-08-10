@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useWebSocket, type EndGameData, type FireRes } from '@/api/websocket'
+import useWebSocket from '@/api/websocket'
 import ChessBoard from './components/chessBoard.vue'
 import { ref, computed } from 'vue'
 import type { Address, BoardData } from '@/type/chess'

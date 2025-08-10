@@ -1,9 +1,12 @@
 import { SIZE } from './config'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { AliveNum, PlaceCell, HasBoat, PlaceBoard } from '@/type/chess'
 import { wordToNumber, numberToWord } from '@/utils/tools'
 import type { LengthNum, LengthWord } from '@/utils/tools'
 import _ from 'lodash'
+import useWebSocket from '@/api/websocket'
+import type { ReceiveMessage } from '@/type/message'
+import { useRouter } from 'vue-router'
 
 interface BoatHTMLElement extends HTMLElement {
   z: boolean
@@ -13,8 +16,21 @@ export default function usePlaceHook() {
   const board = ref<PlaceBoard>(Array.from({ length: SIZE }, (v1, row) =>
     Array.from({ length: SIZE }, (v2, col) => ({ status: 'empty', address: { x: col, y: row }, hasBoat: 0 })),
   ))
-
   const boatNum = ref<AliveNum>({ total: 10, four: 1, three: 2, two: 3, one: 4 })
+
+  onMounted(() => {
+    init()
+  })
+  function init() {
+    const initDataStr = sessionStorage.getItem('placeBoardData')
+    if (initDataStr) {
+      const initData = JSON.parse(initDataStr)
+      board.value = initData.board
+      boatNum.value = initData.boatNum
+      submitted.value = true
+    }
+    sessionStorage.removeItem('placeBoardData')
+  }
 
   const boardListData = computed(() => {
     return board.value.flat() || []
@@ -102,6 +118,49 @@ export default function usePlaceHook() {
     }
   }
 
+  const $router = useRouter()
+
+  function randomPlace() {
+    useWebSocket().sendMessage({ type: 'place:random' })
+  }
+
+  const submitted = ref(false)
+  function submit() {
+    useWebSocket().sendMessage({
+      type: 'place:finish', data: {
+        board: board.value,
+      },
+    })
+    submitted.value = true
+  }
+
+  window.addEventListener('place', ((e: CustomEvent<ReceiveMessage>) => {
+    handleMessage(e.detail)
+  }) as EventListener)
+
+  function handleMessage(message: ReceiveMessage) {
+    const type = message.type
+    switch (type) {
+      case 'place:random': {
+        board.value = message.data.boardData.board
+        boatNum.value = message.data.boardData.boatNum
+        console.log(boatNum.value)
+
+        break
+      }
+      case 'place:finish': {
+        // TODO 传输批判数据
+        console.log(message.data)
+        $router.replace({ name: 'fightPage' })
+        break
+      }
+      case 'place:wait': {
+        console.log('等待对方摆放')
+        break
+      }
+    }
+  }
+
   return {
     boatNum,
     boardListData,
@@ -112,6 +171,9 @@ export default function usePlaceHook() {
     handleLeaveCell,
     handlePlaceCell,
     handleClick,
+    randomPlace,
+    submit,
+    submitted,
   }
 }
 

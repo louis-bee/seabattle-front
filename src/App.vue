@@ -26,17 +26,26 @@ function handleMessage(message: ReceiveMessage) {
       $router.replace({ name: 'matchPage' })
       break
     }
+    case 'match:reconnect-unmatch': {
+      console.log(message.data.message)
+      $router.replace({ name: 'Home' })
+      break
+    }
     case 'match:reconnect-placing': {
       $router.replace({ name: 'placePage' })
       break
     }
     case 'match:reconnect-placed': {
+      sessionStorage.setItem('placeBoardData', JSON.stringify(message.data.myBoardData))
+      $router.replace({ name: 'placePage' })
       break
     }
     case 'match:reconnect-firing': {
+      $router.replace({ name: 'fightPage' })
       break
     }
     case 'match:reconnect-fired': {
+      $router.replace({ name: 'fightPage' })
       break
     }
   }

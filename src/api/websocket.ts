@@ -50,6 +50,10 @@ function createWebSocket(params: UseWSParam) {
       }
 
       case type.startsWith('place'): {
+        const handlePlaceMessage = new CustomEvent('place', {
+          detail: message,
+        })
+        window.dispatchEvent(handlePlaceMessage)
         console.log(message.data.message)
         break
       }
