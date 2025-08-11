@@ -12,12 +12,14 @@ interface BoatHTMLElement extends HTMLElement {
   z: boolean
 }
 
+type PlaceStatus = 'placed' | 'placing'
+
 export default function usePlaceHook() {
   const board = ref<PlaceBoard>(Array.from({ length: SIZE }, (v1, row) =>
     Array.from({ length: SIZE }, (v2, col) => ({ status: 'empty', address: { x: col, y: row }, hasBoat: 0 })),
   ))
   const boatNum = ref<AliveNum>({ total: 10, four: 1, three: 2, two: 3, one: 4 })
-
+  const placeStatus = ref<PlaceStatus>('placing')
   onMounted(() => {
     init()
   })
@@ -27,7 +29,7 @@ export default function usePlaceHook() {
       const initData = JSON.parse(initDataStr)
       board.value = initData.board
       boatNum.value = initData.boatNum
-      submitted.value = true
+      placeStatus.value = 'placed'
     }
     sessionStorage.removeItem('placeBoardData')
   }
@@ -124,14 +126,13 @@ export default function usePlaceHook() {
     useWebSocket().sendMessage({ type: 'place:random' })
   }
 
-  const submitted = ref(false)
   function submit() {
     useWebSocket().sendMessage({
       type: 'place:finish', data: {
         board: board.value,
       },
     })
-    submitted.value = true
+    placeStatus.value = 'placed'
   }
 
   window.addEventListener('place', ((e: CustomEvent<ReceiveMessage>) => {
@@ -149,8 +150,7 @@ export default function usePlaceHook() {
         break
       }
       case 'place:finish': {
-        // TODO 传输批判数据
-        console.log(message.data)
+        sessionStorage.setItem('battleData', JSON.stringify(message.data.battleData))
         $router.replace({ name: 'fightPage' })
         break
       }
@@ -173,7 +173,7 @@ export default function usePlaceHook() {
     handleClick,
     randomPlace,
     submit,
-    submitted,
+    placeStatus,
   }
 }
 

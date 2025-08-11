@@ -59,6 +59,10 @@ function createWebSocket(params: UseWSParam) {
       }
 
       case type.startsWith('battle'): {
+        const handleBattleMessage = new CustomEvent('battle', {
+          detail: message,
+        })
+        window.dispatchEvent(handleBattleMessage)
         console.log(message.data.message)
         break
       }

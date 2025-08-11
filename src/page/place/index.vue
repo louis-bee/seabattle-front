@@ -14,7 +14,7 @@ const {
   handleClick,
   randomPlace,
   submit,
-  submitted,
+  placeStatus,
 } = usePlaceHook()
 
 </script>
@@ -85,13 +85,13 @@ const {
       </div>
 
       <button
-        :disabled="submitted"
+        :disabled="placeStatus ==='placed'"
         @click="randomPlace"
       >
         随机摆放
       </button>
       <button
-        :disabled="boatNum.total>0 || submitted"
+        :disabled="boatNum.total>0 || placeStatus ==='placed'"
         @click="submit"
       >
         完成
