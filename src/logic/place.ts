@@ -1,5 +1,5 @@
 import { SIZE } from './config'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import type { AliveNum, PlaceCell, HasBoat, PlaceBoard } from '@/type/chess'
 import { wordToNumber, numberToWord } from '@/utils/tools'
 import type { LengthNum, LengthWord } from '@/utils/tools'
@@ -38,6 +38,8 @@ export default function usePlaceHook() {
     return board.value.flat() || []
   })
 
+  let boardTemp: PlaceBoard // 用于离开格子时恢复棋盘
+  let isIntersect = false
   let isBoatDraging = false
   let position = 0
   let length: LengthNum = 1
@@ -62,42 +64,93 @@ export default function usePlaceHook() {
     }
   }
 
+  let touchStartPageX: number
+  let touchStartPageY: number
+
+  onMounted(() => {
+    const rect = document.getElementById('board')!.getBoundingClientRect()
+    boardX = rect.left
+    boardY = rect.top
+  })
+  let boardX: number
+  let boardY: number
+  function handleTouchStart(event: TouchEvent) {
+    touchStartPageX = event.targetTouches[0].pageX
+    touchStartPageY = event.targetTouches[0].pageY
+    const target = event.target as HTMLElement
+    const rect = target.getBoundingClientRect()
+    const scrollTop = window.pageYOffset
+    const scrollLeft = window.pageXOffset
+    handleStartMove(event, touchStartPageY - rect.top - scrollTop, touchStartPageX - rect.left - scrollLeft)
+  }
+
+  const touchAddress = ref({ x: -1, y: -1 })
+  watch(
+    () => touchAddress.value,
+    (newVal) => {
+      isBoatDraging = true
+      handleNewStatus(newVal.y, newVal.x)
+    },
+    { deep: true })
+  function handleTouchMove(event: TouchEvent) {
+    const pageX = event.targetTouches[0].pageX
+    const pageY = event.targetTouches[0].pageY
+    const offsetLeft = pageX - touchStartPageX
+    const offsetTop = pageY - touchStartPageY
+    const target = event.target! as HTMLElement
+    target.style.transform = `translate(${offsetLeft}px,${offsetTop}px)`
+    touchAddress.value.x = Math.floor((pageX - boardX) / 50)
+    touchAddress.value.y = Math.floor((pageY - boardY) / 50)
+  }
+  function handleTouchEnd(event: TouchEvent) {
+    if (!isBoatDraging) return
+    const target = event.target! as HTMLElement
+    target.style.transform = ''
+    handlePlace(touchAddress.value.y, touchAddress.value.x)
+    isBoatDraging = false
+  }
+
   function dragStart(event: DragEvent) {
     isBoatDraging = true
-    const target = event.target as BoatHTMLElement
-    z = target.z || false
-    length = wordToNumber(target.id as LengthWord)
-    const offset = z ? event.offsetY : event.offsetX
-    position = Math.floor(offset / 50)
+    handleStartMove(event, event.offsetY, event.offsetX)
   }
   function dragging() { }
   function dragEnd() {
     isBoatDraging = false
   }
 
-  let boardTemp: PlaceBoard // 用于离开格子时恢复棋盘
-  let isIntersect = false
-  function handleEnterCell(cell: PlaceCell) {
+  function handleDragEnter(cell: PlaceCell) {
+    if (!isBoatDraging) return
     setTimeout(() => {
-      if (!isBoatDraging) return
-      const { y, x } = cell.address
-      boardTemp = _.cloneDeep(board.value)
-      const newBoard = _.cloneDeep(boardTemp)
-      const res = updateBoardStatus(newBoard, z, y, x, length, position)
-      board.value = res.newBoard
-      isIntersect = res.isIntersect
+      handleNewStatus(cell.address.y, cell.address.x)
     }, 0)
   }
 
-  function handleLeaveCell() {
+  function handleDragLeave() {
     if (!isBoatDraging) return
     board.value = boardTemp
-    isIntersect = false
   }
-  function handlePlaceCell(cell: PlaceCell) {
+  function handleDrop(cell: PlaceCell) {
     if (!isBoatDraging) return
-    const { y, x } = cell.address
+    handlePlace(cell.address.y, cell.address.x)
+  }
 
+  function handleStartMove(event: Event, offsetY: number, offsetX: number) {
+    boardTemp = _.cloneDeep(board.value)
+    const target = event.target as BoatHTMLElement
+    z = target.z || false
+    length = wordToNumber(target.id as LengthWord)
+    const offset = z ? offsetY : offsetX
+    position = Math.floor(offset / 50)
+  }
+  function handleNewStatus(y: number, x: number) {
+    const newBoard = _.cloneDeep(boardTemp)
+    const res = updateBoardStatus(newBoard, z, y, x, length, position)
+    board.value = res.newBoard
+
+    isIntersect = res.isIntersect
+  }
+  function handlePlace(y: number, x: number) {
     if (isOutOfArea(z, y, x, length, position)) {
       board.value = boardTemp
       isIntersect = false
@@ -111,7 +164,6 @@ export default function usePlaceHook() {
       console.log('重合')
       return
     }
-
     board.value = place(boardTemp, z, y, x, length as HasBoat, position)
     boatNum.value[numberToWord(length)] -= 1
     boatNum.value.total -= 1
@@ -145,8 +197,6 @@ export default function usePlaceHook() {
       case 'place:random': {
         board.value = message.data.boardData.board
         boatNum.value = message.data.boardData.boatNum
-        console.log(boatNum.value)
-
         break
       }
       case 'place:finish': {
@@ -167,18 +217,21 @@ export default function usePlaceHook() {
     dragStart,
     dragEnd,
     dragging,
-    handleEnterCell,
-    handleLeaveCell,
-    handlePlaceCell,
+    handleDragEnter,
+    handleDragLeave,
+    handleDrop,
     handleClick,
     randomPlace,
     submit,
     placeStatus,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
   }
 }
 
 function isOutOfArea(z: boolean, y: number, x: number, length: number, position: number) {
-  if ((z === false && (x + length - position > SIZE || x - position < 0)) || (z === true && (y + length - position > SIZE || y - position < 0))) {
+  if ((z === false && (x + length - position > SIZE || x - position < 0 || y < 0 || y >= SIZE)) || (z === true && (y + length - position > SIZE || y - position < 0 || x < 0 || x >= SIZE))) {
     return true // 超出范围
   } else {
     return false
