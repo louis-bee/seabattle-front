@@ -21,7 +21,7 @@ const {
 
 <template>
   <div class="flex items-center justify-around h-100vh w-800px overflow-auto m-auto">
-    <div class="w-250px flex flex-col gap-20px">
+    <div class="h-500px w-250px flex flex-col gap-20px">
       <div
         v-if="boatNum.four"
         class="flex gap-5px"
@@ -85,18 +85,20 @@ const {
       </div>
 
       <button
+        class="h-50px"
         :disabled="placeStatus ==='placed'"
         @click="randomPlace"
       >
         随机摆放
       </button>
       <button
+        class="h-50px"
         :disabled="boatNum.total>0 || placeStatus ==='placed'"
         @click="submit"
       >
         完成
       </button>
-      <div class="h-200px h-150px h-100px opacity-0" />
+      <div class="h-200px h-150px h-100px opacity-0 position-fixed" />
     </div>
     <div class="flex flex-wrap w-500px h-500px bg-bluegray">
       <Cell

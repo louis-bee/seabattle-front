@@ -68,7 +68,10 @@ function createWebSocket(params: UseWSParam) {
       }
 
       case type.startsWith('info'): {
-        console.log(message.data.message)
+        const handleInfoMessage = new CustomEvent('info', {
+          detail: message,
+        })
+        window.dispatchEvent(handleInfoMessage)
         break
       }
     }

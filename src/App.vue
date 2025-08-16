@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import useReconnect from '@/logic/reconnect'
+import useMatchController from '@/logic/match'
+import useInfoController from '@/logic/info'
 
-const { controller } = useReconnect()
-controller()
+const { matchController } = useMatchController()
+matchController()
+
+const { infoController } = useInfoController()
+infoController()
 </script>
 
 <template>

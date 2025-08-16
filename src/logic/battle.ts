@@ -14,7 +14,7 @@ export function useBattleHook() {
   onMounted(() => {
     init()
   })
-  const init = () => {
+  function init() {
     userName.value.enemyName = getEnemyInfo()!.userName
     userName.value.myName = getUserName()
     const initBattleStr = sessionStorage.getItem('battleData')
@@ -37,7 +37,7 @@ export function useBattleHook() {
   const myBoardData = ref<BoardData>()
   const enemyBoardData = ref<BoardData>()
 
-  const handlefire = () => {
+  function handlefire() {
     if (chosenAddress.value.x < 0 || chosenAddress.value.y < 0 || chosenAddress.value.x >= 10 || chosenAddress.value.y >= 10) return
     sendMessage({ type: 'battle:fire', data: { address: chosenAddress.value } })
     battleStatus.value = 'fired'
@@ -60,7 +60,7 @@ export function useBattleHook() {
     }
   }
 
-  const handleFireResult = (data: FireResultData) => {
+  function handleFireResult(data: FireResultData) {
     const { myBoardResult, enemyBoardResult } = data
     console.log('对方的炮击结果：', myBoardResult.message)
     console.log('我方的炮击结果：', enemyBoardResult.message)
@@ -86,7 +86,7 @@ export function useBattleHook() {
   const showEndDialog = ref(false)
   const endGameData = ref<EndGameData>()
 
-  const handleEndGame = (data: EndGameData) => {
+  function handleEndGame(data: EndGameData) {
     endGameData.value = data
     showEndDialog.value = true
   }
